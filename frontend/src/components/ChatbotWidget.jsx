@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +22,7 @@ const ChatbotWidget = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8080/api/ai/chat', { message: userMsg });
+      const response = await axios.post(`${API_BASE_URL}/ai/chat`, { message: userMsg });
       setMessages(prev => [...prev, { id: Date.now(), sender: 'bot', text: response.data.message }]);
     } catch (error) {
        console.error("AI Error", error);

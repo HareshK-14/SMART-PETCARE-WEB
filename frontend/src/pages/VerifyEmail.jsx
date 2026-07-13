@@ -5,7 +5,9 @@ import { CheckCircle, XCircle, Loader2, PawPrint } from 'lucide-react';
 import axios from 'axios';
 
 // Dynamic host: works on PC (localhost) and phone (network IP) automatically
-const getAPI = () => `http://${window.location.hostname}:8081/api/auth`;
+import API_BASE_URL from '../config';
+
+const getAPI = () => `${API_BASE_URL}/auth`;
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();

@@ -38,7 +38,9 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
-const API = 'http://localhost:8081/api';
+import API_BASE_URL from '../config';
+
+const API = API_BASE_URL;
 
 // ── Gradient helpers ──────────────────────────────────────────────────────────
 const GRAD = 'linear-gradient(135deg,#6366f1,#14b8a6)';
@@ -404,7 +406,7 @@ const VetApprovalsPanel = ({ vets, onApprove, onReject }) => {
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">📄 Verification Document</p>
                       {vet.documentProofUrl ? (
                         <a
-                          href={vet.documentProofUrl.startsWith('http') ? vet.documentProofUrl : `http://${window.location.hostname}:8081${vet.documentProofUrl}`}
+                          href={vet.documentProofUrl.startsWith('http') ? vet.documentProofUrl : `${API.replace('/api', '')}${vet.documentProofUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-sm rounded-xl border border-indigo-200 transition"

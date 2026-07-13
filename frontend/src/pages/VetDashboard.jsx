@@ -12,6 +12,7 @@ import {
   MessageSquare, Send, Paperclip, Brain, Zap, Shield
 } from 'lucide-react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import { logGlobalActivity } from '../utils/activityFeed';
 import { db } from '../utils/dataBridge';
 import DashboardAIChat from '../components/DashboardAIChat';
@@ -167,7 +168,7 @@ const VetSidebar = ({ active, setActive, vet, onLogout }) => (
 // ── Profile Panel (Editable) ──────────────────────────────────────────────────
 const VetProfilePanel = ({ vet, onProfileUpdated }) => {
   const token = localStorage.getItem('token');
-  const apiBase = `http://${window.location.hostname}:8081/api`;
+  const apiBase = API_BASE_URL;
   const authCfg = { headers: { Authorization: `Bearer ${token}` } };
 
   const SPECS = [
@@ -2415,7 +2416,7 @@ const VetDashboard = () => {
 
     try {
       const res = await axios.get(
-        `http://${window.location.hostname}:8081/api/vets/my-profile`,
+        `${API_BASE_URL}/vets/my-profile`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setVetProfile(res.data);

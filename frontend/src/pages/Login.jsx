@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, PawPrint, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
-const getAPI = () => `http://${window.location.hostname}:8081/api/auth`;
+const getAPI = () => `${API_BASE_URL}/auth`;
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -31,7 +32,7 @@ const Login = () => {
       // Fetch the user's profile to get their real name
       let name = email.split('@')[0]; // fallback
       try {
-        const profileRes = await axios.get(`http://${window.location.hostname}:8081/api/admin/users`);
+        const profileRes = await axios.get(`${API_BASE_URL}/admin/users`);
         const me = profileRes.data.find(u => u.id === id);
         if (me && me.name) name = me.name;
       } catch (_) {}

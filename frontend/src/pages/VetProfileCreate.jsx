@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { PawPrint, CheckCircle, Upload, ArrowLeft, ArrowRight, FileText, User, Stethoscope } from 'lucide-react';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 
 const SPECIALIZATIONS = [
     'General Practice', 'Surgery', 'Dermatology', 'Cardiology',
@@ -188,7 +189,7 @@ export default function VetProfileCreate() {
             }
 
             await axios.post(
-                `http://${window.location.hostname}:8081/api/vets/setup-profile`,
+                `${API_BASE_URL}/vets/setup-profile`,
                 formData,
                 {
                     headers: {

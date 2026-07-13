@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import {
   LayoutDashboard, Heart, Calendar, FileText, ShoppingCart,
   Bell, LogOut, PawPrint, Activity, MapPin, Mic, Navigation,
@@ -562,7 +563,7 @@ export default function OwnerDashboard() {
     if (!token) return;
     try {
       const res = await axios.get(
-        `http://${window.location.hostname}:8081/api/users/profile`,
+        `${API_BASE_URL}/users/profile`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');

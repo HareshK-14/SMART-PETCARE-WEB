@@ -4,7 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Phone, ArrowRight, CheckCircle, PawPrint, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 
-const getAPI = () => `http://${window.location.hostname}:8081/api/auth`;
+import API_BASE_URL from '../config';
+
+const getAPI = () => `${API_BASE_URL}/auth`;
 
 // Field must be outside Register to prevent re-mount on every keystroke
 const Field = ({ label, icon: Icon, ...props }) => (
