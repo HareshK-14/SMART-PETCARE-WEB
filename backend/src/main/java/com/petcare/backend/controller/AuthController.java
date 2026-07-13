@@ -100,8 +100,9 @@ public class AuthController {
         profile.setPhone(signUpRequest.getPhone());
         userProfileRepository.save(profile);
 
-        // Generate email verification token
-        String token = UUID.randomUUID().toString();
+        // Generate 6-digit OTP verification token
+        String token = String.format("%06d", new java.util.Random().nextInt(900000) + 100000);
+        System.out.println("👉 [DEMO LOG] Generated OTP code for " + savedUser.getEmail() + " is: " + token);
         EmailVerification verificationToken = new EmailVerification();
         verificationToken.setUser(savedUser);
         verificationToken.setToken(token);
@@ -121,13 +122,26 @@ public class AuthController {
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmailPost(@RequestBody java.util.Map<String, String> payload) {
         String token = payload.get("token");
+        String email = payload.get("email");
+
         if (token == null || token.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: No token provided."));
         }
 
+        // Master OTP bypass code for testing/development
+        if ("123456".equals(token) && email != null && !email.isEmpty()) {
+            User user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                user.setIsEmailVerified(true);
+                userRepository.save(user);
+                emailVerificationRepository.findByUser(user).ifPresent(t -> emailVerificationRepository.delete(t));
+                return ResponseEntity.ok(new MessageResponse("Account successfully verified (Demo Mode)! You can now log in."));
+            }
+        }
+
         EmailVerification verificationToken = emailVerificationRepository.findByToken(token).orElse(null);
         if (verificationToken == null) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid verification link."));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid verification code."));
         }
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             emailVerificationRepository.delete(verificationToken);
@@ -185,8 +199,9 @@ public class AuthController {
             emailVerificationRepository.delete(oldToken);
         });
 
-        // Generate new token
-        String token = UUID.randomUUID().toString();
+        // Generate new 6-digit OTP verification token
+        String token = String.format("%06d", new java.util.Random().nextInt(900000) + 100000);
+        System.out.println("👉 [DEMO LOG] Generated resend OTP code for " + user.getEmail() + " is: " + token);
         EmailVerification verificationToken = new EmailVerification();
         verificationToken.setUser(user);
         verificationToken.setToken(token);

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, CheckCircle, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
+import { Mail, CheckCircle, ArrowRight, RefreshCw, Sparkles, AlertCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import API_BASE_URL from '../config';
 
 export default function CheckEmail() {
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
   const [verifyState, setVerifyState] = useState('idle'); // idle | verifying | done
   const [resent, setResent] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,23 +18,37 @@ export default function CheckEmail() {
     if (pending) setEmail(pending);
   }, []);
 
-  // Demo: "Click to simulate email verification link"
-  const handleSimulateVerify = () => {
+  const handleVerifyOtp = async (e) => {
+    if (e) e.preventDefault();
+    if (otp.length !== 6) {
+      setError('Please enter a 6-digit verification code.');
+      return;
+    }
+    setError('');
     setVerifyState('verifying');
-    setTimeout(() => {
-      // Mark verified in localStorage
-      const users = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-      if (users[email]) {
-        users[email].verified = true;
-        localStorage.setItem('registeredUsers', JSON.stringify(users));
-      }
+    try {
+      await axios.post(`${API_BASE_URL}/auth/verify-email`, {
+        email: email,
+        token: otp
+      });
       localStorage.removeItem('pendingVerificationEmail');
       setVerifyState('done');
-    }, 2000);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Invalid or expired verification code.');
+      setVerifyState('idle');
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setResent(true);
+    setError('');
+    try {
+      await axios.post(`${API_BASE_URL}/auth/resend-verification`, { email });
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to resend verification code.');
+    }
     setTimeout(() => setResent(false), 3000);
   };
 
@@ -87,8 +105,8 @@ export default function CheckEmail() {
                   <Mail className="w-8 h-8 text-indigo-500" />
                 </div>
               </div>
-              <h2 className="text-xl font-extrabold text-slate-900 mb-2">Verifying your email...</h2>
-              <p className="text-slate-400 text-sm">Please wait while we confirm your address.</p>
+              <h2 className="text-xl font-extrabold text-slate-900 mb-2">Verifying your code...</h2>
+              <p className="text-slate-400 text-sm">Please wait while we confirm your OTP.</p>
             </motion.div>
 
           ) : (
@@ -103,34 +121,51 @@ export default function CheckEmail() {
                 <Mail className="w-10 h-10 text-indigo-600" />
               </div>
 
-              <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Check your email</h2>
+              <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Enter Verification Code</h2>
               {email && (
                 <p className="text-sm text-slate-500 mb-1">
-                  We sent a verification link to
+                  We sent a 6-digit OTP code to
                 </p>
               )}
               {email && (
-                <p className="font-bold text-indigo-600 mb-4 text-base">{email}</p>
+                <p className="font-bold text-indigo-600 mb-6 text-base">{email}</p>
               )}
-              <p className="text-slate-500 text-sm mb-8">
-                Click the link in your inbox to verify your account. Once verified you can sign in.
-              </p>
 
-              {/* Demo button — simulates clicking the email link */}
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-left">
-                <div className="flex items-start gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs font-semibold text-amber-800">Demo Mode — Simulate email click</p>
+              {/* OTP Form */}
+              <form onSubmit={handleVerifyOtp} className="space-y-4 mb-6">
+                <div>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    className="w-full text-center tracking-[12px] text-2xl font-bold py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all"
+                  />
                 </div>
-                <p className="text-xs text-amber-700 mb-3">
-                  In production, click the link in the email. For this demo, click the button below to simulate verifying your email:
-                </p>
+                {error && (
+                  <div className="flex items-center gap-1.5 justify-center text-xs text-red-500 font-semibold bg-red-50 border border-red-100 py-2.5 rounded-xl">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
                 <button
-                  onClick={handleSimulateVerify}
-                  className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-bold hover:opacity-90 transition shadow-md shadow-amber-500/30"
+                  type="submit"
+                  className="w-full py-3.5 bg-gradient-to-r from-indigo-500 to-teal-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-all duration-200"
                 >
-                  ✅ Simulate: Click verification link in email
+                  Verify OTP
                 </button>
+              </form>
+
+              {/* Demo Helper Box */}
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-left">
+                <div className="flex items-start gap-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs font-bold text-amber-800">Demo Mode Helper</p>
+                </div>
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  If your email SMTP is not configured or fails to send, you can enter the secret master code <strong>123456</strong> to verify instantly.
+                </p>
               </div>
 
               <button
@@ -138,7 +173,7 @@ export default function CheckEmail() {
                 className="flex items-center justify-center gap-2 w-full py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50 transition mb-4"
               >
                 <RefreshCw className={`w-4 h-4 ${resent ? 'animate-spin text-teal-500' : ''}`} />
-                {resent ? 'Resent! Check your inbox.' : "Didn't receive it? Resend email"}
+                {resent ? 'Code Resent! Check your inbox.' : "Didn't receive code? Resend OTP"}
               </button>
 
               <Link to="/login" className="text-sm text-slate-400 hover:text-indigo-600 transition">

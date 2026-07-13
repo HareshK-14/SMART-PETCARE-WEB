@@ -154,9 +154,12 @@ const Login = () => {
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-3">
-                  <Link to="/check-email"
-                    className="text-xs font-semibold text-amber-700 underline hover:text-amber-900">
-                    Search instructions →
+                  <Link 
+                    to="/check-email"
+                    onClick={() => localStorage.setItem('pendingVerificationEmail', formData.email)}
+                    className="text-xs font-semibold text-amber-700 underline hover:text-amber-900"
+                  >
+                    Enter OTP code instead →
                   </Link>
                   <button
                     type="button"
