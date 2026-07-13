@@ -55,20 +55,29 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            // Note: loadUserByUsername uses Email. Checking if verified happens within AuthenticationProvider logic (isEnabled)
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-        // Note: loadUserByUsername uses Email. Checking if verified happens within AuthenticationProvider logic (isEnabled)
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
+            User userDetails = (User) authentication.getPrincipal();     
 
-        User userDetails = (User) authentication.getPrincipal();     
-
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getEmail(),
-                userDetails.getRole().name()));
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    userDetails.getId(),
+                    userDetails.getEmail(),
+                    userDetails.getRole().name()));
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            String errorMsg = "Error: Invalid email or password.";
+            if (e instanceof org.springframework.security.authentication.DisabledException) {
+                errorMsg = "Error: Email is not verified.";
+            }
+            return ResponseEntity
+                    .status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse(errorMsg));
+        }
     }
 
     @PostMapping("/signup")
