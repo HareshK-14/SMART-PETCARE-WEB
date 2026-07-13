@@ -1,0 +1,12 @@
+node_modules/
+frontend/node_modules/
+backend/target/
+.idea/
+.vscode/
+*.log
+dist/
+frontend/dist/
+.DS_Store
+*.class
+*.jar
+*.war
