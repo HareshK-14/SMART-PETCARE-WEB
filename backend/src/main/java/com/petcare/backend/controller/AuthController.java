@@ -68,7 +68,7 @@ public class AuthController {
             return ResponseEntity.ok(new JwtResponse(jwt,
                     userDetails.getId(),
                     userDetails.getEmail(),
-                    userDetails.getRole().name()));
+                    userDetails.getRole() != null ? userDetails.getRole().name() : "OWNER"));
         } catch (org.springframework.security.core.AuthenticationException e) {
             String errorMsg = "Error: Invalid email or password.";
             if (e instanceof org.springframework.security.authentication.DisabledException) {
@@ -186,6 +186,18 @@ public class AuthController {
         emailVerificationRepository.delete(verificationToken);
 
         return ResponseEntity.ok(new MessageResponse("Email verified successfully"));
+    }
+
+    @GetMapping("/demo-verify")
+    public ResponseEntity<?> demoVerifyEmail(@RequestParam("email") String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found with email: " + email));
+        }
+        user.setIsEmailVerified(true);
+        userRepository.save(user);
+        emailVerificationRepository.findByUser(user).ifPresent(t -> emailVerificationRepository.delete(t));
+        return ResponseEntity.ok(new MessageResponse("Success: Email " + email + " has been successfully verified! You can now close this tab and log in."));
     }
 
     @PostMapping("/resend-verification")
