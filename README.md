@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/HareshK-14/SMART-PETCARE/main/assets/banner.png" alt="Smart PetCare Banner" width="100%"/>
+<img src="https://raw.githubusercontent.com/HareshK-14/SMART-PETCARE/main/assets/banner.png" alt="Smart PetCare Banner" width="100%"/> 
 
 # 🐾 SMART PETCARE
 
